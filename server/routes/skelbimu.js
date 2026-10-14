@@ -1,5 +1,5 @@
 import express from "express";
-import Skelb from "../models/skelbimai.js";
+import Skelbimai from "../models/skelbimai.js";
 
 const router = express.Router();
 
@@ -7,7 +7,7 @@ router.use(express.json());
 
 router.post("/skelbimas", async (req, res) => {
     try {
-        const skelb = await Skelb.create(req.body);
+        const skelb = await Skelbimas.create(req.body);
         res.status(201).json({
             message: "Skelbimas succesfully created",
             data: skelb
@@ -19,7 +19,7 @@ router.post("/skelbimas", async (req, res) => {
 
 router.get("/skelbimas", async (req, res) => {
     try {
-        const skelbs = await Skelb.find();
+        const skelbs = await Skelbimas.find();
         res.json(skelbs);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -28,7 +28,7 @@ router.get("/skelbimas", async (req, res) => {
 
 router.put("/skelbimas/:id", async (req, res) => {
     try {
-        const skelb = await Skelb.findByIdAndUpdate(
+        const skelb = await Skelbimas.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true }
@@ -42,7 +42,7 @@ router.put("/skelbimas/:id", async (req, res) => {
 
 router.delete("/skelbimas/:id", async (req, res) => {
     try {
-        await Skelb.findByIdAndDelete(req.params.id);
+        await Skelbimas.findByIdAndDelete(req.params.id);
         res.json({ message: "Skelbimas istrintas" });
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -4,6 +4,7 @@ import cors from "cors";
 import dns from "node:dns";
 import dotenv from "dotenv";
 import skelbRoutes from "./routes/skelbimu.js";
+import logRoutes from "./routes/login.js"
 
 dotenv.config({ path: "./config.env" });
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
@@ -33,4 +34,4 @@ app.listen(5000, () => {
 
 connectToMongoDB();
 
-app.use("/api", skelbRoutes);
+app.use("/api", skelbRoutes, logRoutes);
