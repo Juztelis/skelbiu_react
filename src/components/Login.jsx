@@ -1,51 +1,78 @@
-// import React from 'react'
-// import { useState } from 'react'
-// export const Login = () => {
-// const [username, setUsername] = useState("")
-// const [email, setEmail] = useState("")
-// const [password, setPassword] = useState("")
+import React from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+function Login() {
+  const navigate = useNavigate();
+  const [values, setValues] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
-// const handleSubmit = (e) => {
-//     e.preventDefault()
-// }
-//   return (
-//     <div>
-//         <form onSubmit={handleSubmit}>
-//             <input type='text' placeholder='username'></input>
-//             <input type='email' placeholder='email'></input>
-//             <input type='password' placeholder='password'></input>
-//         </form>
-//     </div>
-//   )
-// }
-import React from 'react'
-import { useState } from 'react'
-const Login = () => {
-const [username, setUsername] = useState("")
-const [email, setEmail] = useState("")
-const [password, setPassword] = useState("")
-
-const handleSubmit = (e) => {
-    e.preventDefault()
-}
-
-const Clicked = (e) => {
-    if(email === setEmail(e.target.value) && password === setPassword(e.target.value)){
-        console.log(username),
-        console.log(email),
-        console.log(password)
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/skelbimai", { replace: true });
     }
-}
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post(
+        "http://localhost:5000/api/login",
+        values,
+        { withCredentials: true },
+      );
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      console.log(data);
+      alert("Login successful");
+      navigate("/skelbimai", { replace: true });
+    } catch (err) {
+      console.log(err);
+      const message = err.response?.data?.error || "Something went wrong";
+      alert(message);
+    }
+  };
+
   return (
     <div>
-        <form onSubmit={handleSubmit}>
-            <input type='text' placeholder='username' value={username} onChange={(e) => setUsername(e.target.value)} required></input><br></br>
-            <input type='email' placeholder='email' value={email} onChange={(e) => setEmail(e.target.value)} required></input><br></br>
-            <input type='password' placeholder='password' value={password} onChange={(e) => setPassword(e.target.value)} required></input><br></br>
-            <button type='submit' onClick={Clicked}>Log In</button>
-        </form>
+      <h2>Log in Account</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Email </label>
+          <br></br>
+          <input
+            type="email"
+            name="email"
+            placeholder="email"
+            onChange={(e) => setValues({ ...values, email: e.target.value })}
+          ></input>
+          <br></br>
+        </div>
+        <div>
+          <label>Password </label>
+          <br></br>
+          <input
+            type="password"
+            name="password"
+            placeholder="password"
+            onChange={(e) => setValues({ ...values, password: e.target.value })}
+          ></input>
+          <br></br>
+        </div>
+        <button type="submit">Login</button>
+        <br></br>
+        <span>
+          Dont have an account? <Link to="/register">Register</Link>
+        </span>
+      </form>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

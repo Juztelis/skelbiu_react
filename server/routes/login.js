@@ -1,64 +1,49 @@
 import express from "express";
-import LogIn from "../models/loginas.js"
+import LogIn from "../models/loginas.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import bcrypt from "bcrypt";
+import { generateToken } from "../middleware/auth.js";
+dotenv.config({ path: "./config.env" });
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const router = express.Router();
 
 router.use(express.json());
 
 router.post("/register", async (req, res) => {
-    try {
-        const user = await User.create({
-            username: req.body.username,
-            email: req.body.email,
-            password: req.body.password
-        });
-
-        res.json(user);
-    } catch (error) {
-        res.status(400).json({ error: "Could not register user" });
-    }
+  try {
+    const { username, email, password } = req.body;
+    const user = await LogIn.create({ username, email, password });
+    const token = generateToken(user._id);
+    res.status(201).json({ user: user._id, created: true });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get("/login", async (req, res) => {
-    const user = await User.findOne({
-        username: req.body.username,
-        password: req.body.password
-    });
+router.post("/login", async (req, res) => {
+  try {
+    const user = await LogIn.findOne({ email: req.body.email });
 
-    if (!user) {
-        return res.status(401).json({
-            error: "Wrong username or password"
-        });
-    }
+    if (!user) throw new Error("User not found");
+
+    const isValid = await bcrypt.compare(req.body.password, user.password);
+
+    if (!isValid) throw new Error("Wrong password");
+
+    const token = generateToken(user._id);
 
     res.json({
-        message: "Login successful",
-        userId: user._id,
-        username: user.username
+      message: "Login successful",
+      token,
+      userId: user._id,
+      username: user.username,
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
-
-// router.put("/login/:id", async (req, res) => {
-//     try {
-//         const log = await LogIn.findByIdAndUpdate(
-//             req.params.id,
-//             req.body,
-//             { new: true }
-//         );
-
-//         res.json(log);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// });
-
-// router.delete("/login/:id", async (req, res) => {
-//     try {
-//         await LogIn.findByIdAndDelete(req.params.id);
-//         res.json({ message: "paskira istrinta" });
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// });
 
 export default router;
